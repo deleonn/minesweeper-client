@@ -70,9 +70,6 @@ class Minesweeper {
 
     bombsCoords.forEach(([x, y]) => {
       newBoard[x][y] = 10;
-      const currentPos = [x, y];
-      console.log(currentPos);
-      console.log(`x: ${x}, y: ${y}`);
 
       // Iterate around the center of the currentPos and add +1 as a hint
       for (let xAxis = x - 1; xAxis < x + 2; xAxis++) {
