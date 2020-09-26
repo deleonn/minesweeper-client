@@ -20,19 +20,19 @@ function App() {
   function returnBoard() {
     const cols = board?.map((col: any[], xIdx: number) => {
       return (
-        <Row key={xIdx}>
+        <Col key={xIdx}>
           {col.map((el: CellType, yIdx: number) => {
             return (
               <Cell key={yIdx} onClick={() => getCoords(xIdx, yIdx)}>
-                {el === 10 ? "true" : ""}
+                {el !== 0 ? el : ""}
               </Cell>
             );
           })}
-        </Row>
+        </Col>
       );
     });
 
-    return <Col>{cols}</Col>;
+    return <Row>{cols}</Row>;
   }
 
   return (

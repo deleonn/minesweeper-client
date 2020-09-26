@@ -1,7 +1,7 @@
 interface Settings {
   rows: number;
   columns: number;
-  mines: number;
+  bombs: number;
 }
 
 export type Board = Array<Cell[]> | undefined;
@@ -12,13 +12,13 @@ class Minesweeper {
   private board: Board;
   private rows: number;
   private columns: number;
-  private mines: number;
+  private bombs: number;
 
   constructor(settings?: Settings) {
     this.board = undefined;
-    this.rows = settings?.rows || 8;
-    this.columns = settings?.columns || 10;
-    this.mines = settings?.mines || 10;
+    this.columns = settings?.columns || 8; // x axis
+    this.rows = settings?.rows || 10; // y axis
+    this.bombs = settings?.bombs || 10 || (this.columns * this.rows) / 10;
 
     this.new();
   }
@@ -57,16 +57,40 @@ class Minesweeper {
    * @returns Board
    */
   private generateBoard(): Board {
-    const newBoard: Board = new Array(this.columns).fill(
-      new Array(this.rows).fill(null)
-    );
+    const newBoard: Board = [];
 
-    const minesCoords = this.getCoordsWithMines();
+    for (let x = 0; x < this.columns; x++) {
+      newBoard.push([]);
+      for (let y = 0; y < this.rows; y++) {
+        newBoard![x][y] = 0;
+      }
+    }
 
-    console.log(minesCoords);
+    const bombsCoords = this.getCoordsWithBombs();
 
-    minesCoords.forEach(([x, y]: [number, number]) => {
+    bombsCoords.forEach(([x, y]) => {
       newBoard[x][y] = 10;
+      const currentPos = [x, y];
+      console.log(currentPos);
+      console.log(`x: ${x}, y: ${y}`);
+
+      // Iterate around the center of the currentPos and add +1 as a hint
+      for (let xAxis = x - 1; xAxis < x + 2; xAxis++) {
+        for (let yAxis = y - 1; yAxis < y + 2; yAxis++) {
+          // Calculate out-of-bounds to place hints
+          if (
+            xAxis !== -1 &&
+            yAxis !== -1 &&
+            xAxis < this.columns &&
+            yAxis < this.rows &&
+            newBoard[xAxis][yAxis] !== 10
+          ) {
+            console.log("xAxis", xAxis);
+            console.log("yAxis", yAxis);
+            newBoard[xAxis][yAxis] += 1;
+          }
+        }
+      }
     });
 
     this.board = newBoard;
@@ -74,31 +98,31 @@ class Minesweeper {
   }
 
   /**
-   * getCoordsWithMines returns random X,Y positions per each mine the board should have
+   * getCoordsWithBombs returns random X,Y positions per each bomb the board should have
    *
    * @returns Array<[number, number]>
    */
-  private getCoordsWithMines(): Array<[number, number]> {
-    let mineCount = this.mines;
+  private getCoordsWithBombs(): Array<[number, number]> {
+    let bombCount = this.bombs;
     const result: Array<[number, number]> = [];
 
-    while (mineCount > 0) {
+    while (bombCount > 0) {
       // Get a random [X, Y] position
       const randomXCoord = this.getRandomCoord(0, this.columns - 1);
       const randomYCoord = this.getRandomCoord(0, this.rows - 1);
 
       result.push([randomXCoord, randomYCoord]);
 
-      mineCount -= 1;
+      bombCount -= 1;
     }
 
     return result;
   }
 
   /**
-   * Random mine activator is a helper function that returns the probability
-   * for a cell to have a mine. It generates a random number between 0 and 1 and returns
-   * true if the number is higher than 0.7;
+   * getRandomCoord is a helper function that returns a random coordinate
+   * given min and max values. This function is used to randomly calculate
+   * where to place bombs.
    */
   private getRandomCoord(min: number, max: number): number {
     let randomNumber = Math.floor(Math.random() * (max - min + 1) + min);
@@ -108,7 +132,7 @@ class Minesweeper {
   /**
    * revealCell is triggered when a user clicks on a cell to reveal its contents.
    * If the selected cell is flagged, cell should not be revealed.
-   * Should also evaluate if the user clicked on a field with a mine and end the game.
+   * Should also evaluate if the user clicked on a field with a bomb and end the game.
    *
    * @param x X coordinate
    * @param y Y coordinate
