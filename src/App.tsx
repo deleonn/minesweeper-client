@@ -3,41 +3,49 @@ import { Board, Cell, Col, Row } from "./components";
 import Minesweeper, {
   Board as BoardType,
   Cell as CellType,
+  GameState,
 } from "./core/Minesweeper";
 
 function App() {
-  const [board, setBoard] = React.useState<BoardType | undefined>(undefined);
+  const [minesweeper] = React.useState<Minesweeper>(new Minesweeper());
+  const [board, setBoard] = React.useState<BoardType | undefined>(
+    minesweeper.getBoard()
+  );
+  const [gameState, setGameState] = React.useState<GameState>(
+    minesweeper.getGameState()
+  );
 
   React.useEffect(() => {
-    const minesweeper = new Minesweeper();
-    setBoard(minesweeper.getBoard());
-  }, []);
+    minesweeper.addEventListener("movement", setBoard);
+    minesweeper.addEventListener("state", setGameState);
+  }, [minesweeper]);
 
-  function getCoords(x: number, y: number) {
-    return [x, y];
-  }
-
-  function returnBoard() {
-    const cols = board?.map((col: any[], xIdx: number) => {
-      return (
-        <Col key={xIdx}>
-          {col.map((el: CellType, yIdx: number) => {
-            return (
-              <Cell key={yIdx} onClick={() => getCoords(xIdx, yIdx)}>
-                {el !== 0 ? el : ""}
-              </Cell>
-            );
-          })}
-        </Col>
-      );
-    });
-
-    return <Row>{cols}</Row>;
+  function revealCell(x: number, y: number) {
+    minesweeper.revealCell(x, y);
   }
 
   return (
     <div>
-      <Board>{returnBoard()}</Board>
+      <p style={{ position: "absolute", left: "2rem", top: "2rem" }}>
+        Game State: {gameState}
+      </p>
+      <Board>
+        <Row>
+          {board?.map((col: any[], xIdx: number) => {
+            return (
+              <Col key={xIdx}>
+                {col.map((el: CellType, yIdx: number) => {
+                  return (
+                    <Cell key={yIdx} onClick={() => revealCell(xIdx, yIdx)}>
+                      {el !== 0 ? el : ""}
+                    </Cell>
+                  );
+                })}
+              </Col>
+            );
+          })}
+        </Row>
+      </Board>
     </div>
   );
 }

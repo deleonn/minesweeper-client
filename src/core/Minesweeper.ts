@@ -5,17 +5,27 @@ interface Settings {
 }
 
 export type Board = Array<Cell[]> | undefined;
-
 export type Cell = number;
+export type EventQueue = {
+  movement: Array<EventHandler>;
+  state: Array<EventHandler>;
+};
+export type GameState = "new" | "active" | "won" | "lost";
+export type GameEvent = "movement" | "state";
+export type EventHandler = (event: any) => void;
 
 class Minesweeper {
-  private board: Board;
+  private board: Board = undefined;
   private rows: number;
   private columns: number;
   private bombs: number;
+  private eventQueue: EventQueue = {
+    movement: [],
+    state: [],
+  };
+  private gameState: GameState = "new";
 
   constructor(settings?: Settings) {
-    this.board = undefined;
     this.columns = settings?.columns || 8; // x axis
     this.rows = settings?.rows || 10; // y axis
     this.bombs = settings?.bombs || 10 || (this.columns * this.rows) / 10;
@@ -27,7 +37,7 @@ class Minesweeper {
    * Create a new instance of the game and start a new board
    */
   public new(): void {
-    this.generateBoard();
+    this.initializeEmptyBoard();
   }
 
   /**
@@ -52,11 +62,13 @@ class Minesweeper {
   }
 
   /**
-   * Generate a new board
-   *
-   * @returns Board
+   * Retuns the current gameState
    */
-  private generateBoard(): Board {
+  public getGameState(): GameState {
+    return this.gameState;
+  }
+
+  public initializeEmptyBoard(): Board {
     const newBoard: Board = [];
 
     for (let x = 0; x < this.columns; x++) {
@@ -66,10 +78,24 @@ class Minesweeper {
       }
     }
 
+    this.board = newBoard;
+    return this.board;
+  }
+
+  /**
+   * Generate a new board
+   *
+   * @returns Board
+   */
+  private generateBoard(x: number, y: number): Board {
+    // Generate new board with bombs
+    this.gameState = "active";
+    this.dispatchEvent("state");
+
     const bombsCoords = this.getCoordsWithBombs();
 
     bombsCoords.forEach(([x, y]) => {
-      newBoard[x][y] = 10;
+      this.board![x][y] = 10;
 
       // Iterate around the center of the currentPos and add +1 as a hint
       for (let xAxis = x - 1; xAxis < x + 2; xAxis++) {
@@ -80,18 +106,29 @@ class Minesweeper {
             yAxis !== -1 &&
             xAxis < this.columns &&
             yAxis < this.rows &&
-            newBoard[xAxis][yAxis] !== 10
+            this.board![xAxis][yAxis] !== 10
           ) {
-            console.log("xAxis", xAxis);
-            console.log("yAxis", yAxis);
-            newBoard[xAxis][yAxis] += 1;
+            this.board![xAxis][yAxis] += 1;
           }
         }
       }
     });
 
-    this.board = newBoard;
+    // Do first click reveal logic:
+    // Check where the user clicked and update board accordingly.
+    // If the user clicked in a cell with zero value, reveal cells next to it.
+    // Otherwise, just reveal that cell.
+
+    this.dispatchEvent("movement");
+
     return this.board;
+  }
+
+  /**
+   * Update the board based on the user's input
+   */
+  private updateBoard() {
+    // Start updating board on user input after first click
   }
 
   /**
@@ -134,7 +171,15 @@ class Minesweeper {
    * @param x X coordinate
    * @param y Y coordinate
    */
-  public revealCell(x: number, y: number) {}
+  public revealCell(x: number, y: number) {
+    switch (this.gameState) {
+      case "new":
+        this.generateBoard(x, y);
+        break;
+      case "active":
+        break;
+    }
+  }
 
   /**
    * placeFlag is triggered when a user decides to flag a cell.
@@ -145,6 +190,33 @@ class Minesweeper {
    * @param y
    */
   public placeFlag(x: number, y: number) {}
+
+  /**
+   * Register an event into the eventQueue
+   *
+   * @param event
+   */
+  public addEventListener(type: GameEvent, callback: EventHandler): void {
+    if (type === "movement") {
+      this.eventQueue.movement.push(callback);
+    }
+    if (type === "state") {
+      this.eventQueue.state.push(callback);
+    }
+  }
+
+  /**
+   * Dispatch an event from the eventQueue
+   *
+   * @param event
+   */
+  public dispatchEvent(type: GameEvent): void {
+    if (type === "movement") {
+      this.eventQueue.movement.forEach((callback) => callback(this.board));
+    } else if (type === "state") {
+      this.eventQueue.state.forEach((callback) => callback(this.gameState));
+    }
+  }
 }
 
 export default Minesweeper;
