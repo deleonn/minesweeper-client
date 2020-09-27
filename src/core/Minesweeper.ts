@@ -5,7 +5,7 @@ interface Settings {
 }
 
 export type Board = Array<Cell[]> | undefined;
-export type Cell = number;
+export type Cell = number | null;
 export type EventQueue = {
   movement: Array<EventHandler>;
   state: Array<EventHandler>;
@@ -27,8 +27,8 @@ class Minesweeper {
 
   constructor(settings?: Settings) {
     this.columns = settings?.columns || 8; // x axis
-    this.rows = settings?.rows || 10; // y axis
-    this.bombs = settings?.bombs || 10 || (this.columns * this.rows) / 10;
+    this.rows = settings?.rows || 8; // y axis
+    this.bombs = settings?.bombs || 8 || (this.columns * this.rows) / 10;
 
     this.new();
   }
@@ -74,7 +74,7 @@ class Minesweeper {
     for (let x = 0; x < this.columns; x++) {
       newBoard.push([]);
       for (let y = 0; y < this.rows; y++) {
-        newBoard![x][y] = 0;
+        newBoard![x][y] = null;
       }
     }
 
@@ -108,7 +108,7 @@ class Minesweeper {
             yAxis < this.rows &&
             this.board![xAxis][yAxis] !== 10
           ) {
-            this.board![xAxis][yAxis] += 1;
+            this.board![xAxis][yAxis]! += 1;
           }
         }
       }

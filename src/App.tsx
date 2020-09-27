@@ -1,10 +1,22 @@
 import React from "react";
+import styled from "styled-components";
 import { Board, Cell, Col, Row } from "./components";
+import Actions from "./components/Actions";
+import Timer from "./components/Timer";
 import Minesweeper, {
   Board as BoardType,
   Cell as CellType,
   GameState,
 } from "./core/Minesweeper";
+
+const MainContent = styled.div`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #e5e4ec;
+`;
 
 function App() {
   const [minesweeper] = React.useState<Minesweeper>(new Minesweeper());
@@ -25,19 +37,18 @@ function App() {
   }
 
   return (
-    <div>
-      <p style={{ position: "absolute", left: "2rem", top: "2rem" }}>
-        Game State: {gameState}
-      </p>
+    <MainContent>
+      <Actions />
       <Board>
         <Row>
           {board?.map((col: any[], xIdx: number) => {
             return (
               <Col key={xIdx}>
                 {col.map((el: CellType, yIdx: number) => {
+                  console.log(el);
                   return (
                     <Cell key={yIdx} onClick={() => revealCell(xIdx, yIdx)}>
-                      {el !== 0 ? el : ""}
+                      {el}
                     </Cell>
                   );
                 })}
@@ -46,7 +57,7 @@ function App() {
           })}
         </Row>
       </Board>
-    </div>
+    </MainContent>
   );
 }
 
