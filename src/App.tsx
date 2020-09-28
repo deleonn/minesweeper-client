@@ -2,7 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import { Board, Cell, Col, Row } from "./components";
 import Actions from "./components/Actions";
+import Modal from "./components/Modal";
 import Timer from "./components/Timer";
+import useModal from "./components/useModal";
 import Minesweeper, {
   Board as BoardType,
   Cell as CellType,
@@ -19,12 +21,25 @@ const MainContent = styled.div`
 `;
 
 function App() {
-  const [minesweeper] = React.useState<Minesweeper>(new Minesweeper());
+  const [minesweeper] = React.useState<Minesweeper>(
+    new Minesweeper({ level: "medium" })
+  );
   const [board, setBoard] = React.useState<BoardType>(minesweeper.getBoard());
+  const [gameState, setGameState] = React.useState<GameState>(
+    minesweeper.getGameState()
+  );
+  const { isShowing, toggle } = useModal();
 
   React.useEffect(() => {
     minesweeper.addEventListener("movement", setBoard);
+    minesweeper.addEventListener("state", setGameState);
   }, [minesweeper]);
+
+  React.useEffect(() => {
+    if (gameState === "lost" || gameState === "won") {
+      toggle();
+    }
+  }, [gameState]);
 
   function revealCell(x: number, y: number) {
     minesweeper.revealCell(x, y);
@@ -35,9 +50,13 @@ function App() {
     minesweeper.placeFlag(x, y);
   }
 
+  function startNewGame() {
+    minesweeper.new();
+  }
+
   return (
     <MainContent>
-      <Actions />
+      <Actions startGame={startNewGame} />
       <Board>
         <Row>
           {board?.map((col: any[], xIdx: number) => {
@@ -59,6 +78,7 @@ function App() {
           })}
         </Row>
       </Board>
+      <Modal isShowing={isShowing} hide={toggle} state={gameState} />
     </MainContent>
   );
 }
