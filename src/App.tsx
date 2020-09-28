@@ -23,14 +23,10 @@ function App() {
   const [board, setBoard] = React.useState<BoardType>(minesweeper.getBoard());
 
   React.useEffect(() => {
-    console.log(board);
-  }, [board]);
-
-  React.useEffect(() => {
     minesweeper.addEventListener("movement", setBoard);
   }, [minesweeper]);
 
-  function revealCell(event: React.MouseEvent, x: number, y: number) {
+  function revealCell(x: number, y: number) {
     minesweeper.revealCell(x, y);
   }
 
@@ -51,7 +47,7 @@ function App() {
                   return (
                     <Cell
                       key={yIdx}
-                      onClick={(event) => revealCell(event, xIdx, yIdx)}
+                      onClick={() => revealCell(xIdx, yIdx)}
                       onContextMenu={(event) => placeFlag(event, xIdx, yIdx)}
                     >
                       {el}
