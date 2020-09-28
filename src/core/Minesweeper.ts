@@ -198,11 +198,17 @@ class Minesweeper {
       const randomXCoord = this.getRandomCoord(0, this.columns - 1);
       const randomYCoord = this.getRandomCoord(0, this.rows - 1);
 
-      if (!result.find((res) => res === [randomXCoord, randomYCoord])) {
+      if (
+        !result.find(
+          (res) => res[0] === randomXCoord && res[1] === randomYCoord
+        )
+      ) {
         result.push([randomXCoord, randomYCoord]);
         bombCount -= 1;
       }
     }
+
+    console.log(result);
 
     return result;
   }
@@ -244,7 +250,21 @@ class Minesweeper {
    * @param x
    * @param y
    */
-  public placeFlag(x: number, y: number) {}
+  public placeFlag(x: number, y: number) {
+    if (this.gameState === "new" || this.gameState === "active") {
+      const boardClone = [...this.board.map((r) => [...r])];
+
+      if (boardClone[x][y] === null) {
+        boardClone[x][y] = 99;
+      } else if (boardClone[x][y] == 99) {
+        boardClone[x][y] = null;
+      }
+
+      this.board = boardClone;
+
+      this.dispatchEvent("movement");
+    }
+  }
 
   /**
    * Register an event into the eventQueue

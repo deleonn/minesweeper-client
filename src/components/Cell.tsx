@@ -1,10 +1,12 @@
 import React from "react";
 import styled, { css } from "styled-components";
 const bomb = require("./bomb.svg") as string;
+const flag = require("./flag.svg") as string;
 
 interface Props {
   children: any;
-  onClick: () => void;
+  onClick: (event: React.MouseEvent) => void;
+  onContextMenu: (event: React.MouseEvent) => void;
 }
 
 const CellContainer = styled.button`
@@ -16,7 +18,7 @@ const CellContainer = styled.button`
   border-radius: 10px;
   background: #e5e4ec;
   box-shadow: 5px 5px 20px #c3c2c9, -5px -5px 20px #ffffff;
-  margin: 10px;
+  margin: 8px;
   width: 50px;
   height: 50px;
   border: none;
@@ -92,14 +94,29 @@ const Bomb = styled.img`
   height: 1.2rem;
 `;
 
-function Cell({ children, onClick }: Props) {
-  function handleClick() {
-    onClick();
+const Flag = styled.img`
+  width: 1.6rem;
+  height: 1.6rem;
+`;
+
+function Cell({ children, onClick, onContextMenu }: Props) {
+  function handleClick(event: React.MouseEvent) {
+    onClick(event);
+  }
+
+  function handleContextClick(event: React.MouseEvent) {
+    onContextMenu(event);
   }
 
   return (
-    <CellContainer onClick={handleClick}>
-      {children === 10 ? <Bomb src={bomb} /> : children}
+    <CellContainer onClick={handleClick} onContextMenu={handleContextClick}>
+      {children === 10 ? (
+        <Bomb src={bomb} />
+      ) : children === 99 ? (
+        <Flag src={flag} />
+      ) : (
+        children
+      )}
     </CellContainer>
   );
 }

@@ -30,8 +30,13 @@ function App() {
     minesweeper.addEventListener("movement", setBoard);
   }, [minesweeper]);
 
-  function revealCell(x: number, y: number) {
+  function revealCell(event: React.MouseEvent, x: number, y: number) {
     minesweeper.revealCell(x, y);
+  }
+
+  function placeFlag(event: React.MouseEvent, x: number, y: number) {
+    event.preventDefault();
+    minesweeper.placeFlag(x, y);
   }
 
   return (
@@ -44,7 +49,11 @@ function App() {
               <Col key={xIdx}>
                 {col.map((el: CellType, yIdx: number) => {
                   return (
-                    <Cell key={yIdx} onClick={() => revealCell(xIdx, yIdx)}>
+                    <Cell
+                      key={yIdx}
+                      onClick={(event) => revealCell(event, xIdx, yIdx)}
+                      onContextMenu={(event) => placeFlag(event, xIdx, yIdx)}
+                    >
                       {el}
                     </Cell>
                   );
