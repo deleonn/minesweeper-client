@@ -20,16 +20,14 @@ const MainContent = styled.div`
 
 function App() {
   const [minesweeper] = React.useState<Minesweeper>(new Minesweeper());
-  const [board, setBoard] = React.useState<BoardType | undefined>(
-    minesweeper.getBoard()
-  );
-  const [gameState, setGameState] = React.useState<GameState>(
-    minesweeper.getGameState()
-  );
+  const [board, setBoard] = React.useState<BoardType>(minesweeper.getBoard());
+
+  React.useEffect(() => {
+    console.log(board);
+  }, [board]);
 
   React.useEffect(() => {
     minesweeper.addEventListener("movement", setBoard);
-    minesweeper.addEventListener("state", setGameState);
   }, [minesweeper]);
 
   function revealCell(x: number, y: number) {
@@ -45,7 +43,6 @@ function App() {
             return (
               <Col key={xIdx}>
                 {col.map((el: CellType, yIdx: number) => {
-                  console.log(el);
                   return (
                     <Cell key={yIdx} onClick={() => revealCell(xIdx, yIdx)}>
                       {el}

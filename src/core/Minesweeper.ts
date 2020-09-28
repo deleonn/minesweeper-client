@@ -4,7 +4,7 @@ interface Settings {
   bombs: number;
 }
 
-export type Board = Array<Cell[]> | undefined;
+export type Board = Array<Cell[]>;
 export type Cell = number | null;
 export type EventQueue = {
   movement: Array<EventHandler>;
@@ -15,7 +15,8 @@ export type GameEvent = "movement" | "state";
 export type EventHandler = (event: any) => void;
 
 class Minesweeper {
-  private board: Board = undefined;
+  private board: Board = [];
+  private solutionBoard: Board = [];
   private rows: number;
   private columns: number;
   private bombs: number;
@@ -68,6 +69,19 @@ class Minesweeper {
     return this.gameState;
   }
 
+  /**
+   * Finish the game
+   *
+   * @returns Board
+   */
+  private gameOver(): Board {
+    this.gameState = "lost";
+
+    this.board = this.solutionBoard;
+    this.dispatchEvent("movement");
+    return this.board;
+  }
+
   public initializeEmptyBoard(): Board {
     const newBoard: Board = [];
 
@@ -78,7 +92,10 @@ class Minesweeper {
       }
     }
 
-    this.board = newBoard;
+    // Clone newBoard value instead of assigning to avoid referencing the same value.
+    this.board = [...newBoard.map((r) => [...r])];
+    this.solutionBoard = [...newBoard.map((r) => [...r])];
+
     return this.board;
   }
 
@@ -90,12 +107,12 @@ class Minesweeper {
   private generateBoard(x: number, y: number): Board {
     // Generate new board with bombs
     this.gameState = "active";
-    this.dispatchEvent("state");
+    // this.dispatchEvent("state");
 
     const bombsCoords = this.getCoordsWithBombs();
 
     bombsCoords.forEach(([x, y]) => {
-      this.board![x][y] = 10;
+      this.solutionBoard[x][y] = 10;
 
       // Iterate around the center of the currentPos and add +1 as a hint
       for (let xAxis = x - 1; xAxis < x + 2; xAxis++) {
@@ -106,18 +123,35 @@ class Minesweeper {
             yAxis !== -1 &&
             xAxis < this.columns &&
             yAxis < this.rows &&
-            this.board![xAxis][yAxis] !== 10
+            this.solutionBoard[xAxis][yAxis] !== 10
           ) {
-            this.board![xAxis][yAxis]! += 1;
+            this.solutionBoard[xAxis][yAxis]! += 1;
           }
         }
       }
     });
 
     // Do first click reveal logic:
-    // Check where the user clicked and update board accordingly.
+    // Check where the user clicked and update solutionBoard accordingly.
     // If the user clicked in a cell with zero value, reveal cells next to it.
     // Otherwise, just reveal that cell.
+
+    const solutionBoardValue = this.solutionBoard[x][y];
+
+    if (solutionBoardValue === 10) {
+      return this.gameOver();
+    }
+
+    const boardClone = [...this.board.map((r) => [...r])];
+    boardClone[x][y] = solutionBoardValue || 0;
+
+    this.board = boardClone;
+
+    // if (solutionBoardValue === null) {
+    //   // Reveal zeroes around it
+    //   this.revealZeros();
+    //   return;
+    // }
 
     this.dispatchEvent("movement");
 
@@ -127,8 +161,27 @@ class Minesweeper {
   /**
    * Update the board based on the user's input
    */
-  private updateBoard() {
+  private updateBoard(x: number, y: number): Board {
     // Start updating board on user input after first click
+
+    const solutionBoardValue = this.solutionBoard[x][y];
+
+    if (solutionBoardValue === 10) {
+      return this.gameOver();
+    }
+
+    // if (solutionBoardValue === 0) {
+    //   // Reveal zeroes around it
+    //   return;
+    // }
+    const boardClone = [...this.board.map((r) => [...r])];
+    boardClone[x][y] = solutionBoardValue || 0;
+
+    this.board = boardClone;
+
+    this.dispatchEvent("movement");
+
+    return this.board;
   }
 
   /**
@@ -145,9 +198,10 @@ class Minesweeper {
       const randomXCoord = this.getRandomCoord(0, this.columns - 1);
       const randomYCoord = this.getRandomCoord(0, this.rows - 1);
 
-      result.push([randomXCoord, randomYCoord]);
-
-      bombCount -= 1;
+      if (!result.find((res) => res === [randomXCoord, randomYCoord])) {
+        result.push([randomXCoord, randomYCoord]);
+        bombCount -= 1;
+      }
     }
 
     return result;
@@ -177,6 +231,7 @@ class Minesweeper {
         this.generateBoard(x, y);
         break;
       case "active":
+        this.updateBoard(x, y);
         break;
     }
   }
@@ -213,8 +268,6 @@ class Minesweeper {
   public dispatchEvent(type: GameEvent): void {
     if (type === "movement") {
       this.eventQueue.movement.forEach((callback) => callback(this.board));
-    } else if (type === "state") {
-      this.eventQueue.state.forEach((callback) => callback(this.gameState));
     }
   }
 }

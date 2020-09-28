@@ -27,7 +27,6 @@ const CellContainer = styled.button`
   }
 
   ${({ children }) => {
-    console.log(children);
     switch (children) {
       case 0:
         return css`
