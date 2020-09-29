@@ -1,10 +1,4 @@
-interface Settings {
-  rows: number;
-  columns: number;
-  bombs: number;
-  level: "easy" | "medium" | "hard";
-}
-
+export type Level = "easy" | "medium" | "hard";
 export type Board = Array<Cell[]>;
 export type Cell = number | null;
 export type EventQueue = {
@@ -26,19 +20,17 @@ class Minesweeper {
     state: [],
   };
   private gameState: GameState = "new";
-  private level: Settings["level"];
 
-  constructor(settings?: Partial<Settings>) {
-    const ratios = {
+  constructor(private readonly level: Level = "easy") {
+    const levelRatios = {
       easy: 0.07,
       medium: 0.15,
       hard: 0.35,
     };
 
-    this.level = settings?.level || "easy";
-    this.columns = settings?.columns || 8; // x axis
-    this.rows = settings?.rows || 8; // y axis
-    this.bombs = Math.round(this.columns ** 2 * ratios[this.level]) + 1;
+    this.columns = Math.round(8 ** levelRatios[this.level] * 2) + 4; // x axis
+    this.rows = Math.round(8 ** levelRatios[this.level] * 2) + 4; // y axis
+    this.bombs = Math.round(this.columns ** 2 * levelRatios[this.level]) + 1;
 
     this.new();
   }

@@ -21,9 +21,7 @@ const MainContent = styled.div`
 `;
 
 function App() {
-  const [minesweeper] = React.useState<Minesweeper>(
-    new Minesweeper({ level: "medium" })
-  );
+  const [minesweeper] = React.useState<Minesweeper>(new Minesweeper("medium"));
   const [board, setBoard] = React.useState<BoardType>(minesweeper.getBoard());
   const [gameState, setGameState] = React.useState<GameState>(
     minesweeper.getGameState()
@@ -33,6 +31,9 @@ function App() {
   React.useEffect(() => {
     minesweeper.addEventListener("movement", setBoard);
     minesweeper.addEventListener("state", setGameState);
+    console.info(
+      `INSTRUCTIONS: Right click to reveal cell, left click to place a flag. Have fun!`
+    );
   }, [minesweeper]);
 
   React.useEffect(() => {
@@ -56,6 +57,7 @@ function App() {
 
   return (
     <MainContent>
+      {gameState === "active" && <Timer />}
       <Actions startGame={startNewGame} />
       <Board>
         <Row>
