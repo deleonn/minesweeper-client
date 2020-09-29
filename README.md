@@ -4,6 +4,9 @@ React-based minesweeper using neumorphism visual styling.
 
 ![minesweeper](./minesweeper.png)
 
+See [https://deleonn.github.io/minesweeper-client](https://deleonn.github.io/minesweeper-client) for demo.
+
+
 ## How to play
 
 - Use left click to reveal a cell.
