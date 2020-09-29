@@ -34,6 +34,14 @@ function App() {
     console.info(
       `INSTRUCTIONS: Right click to reveal cell, left click to place a flag. Have fun!`
     );
+
+    const gameParameters = localStorage.getItem("game_instance");
+
+    if (gameParameters) {
+      console.log("Restoring game parameters");
+      minesweeper.restoreGameParameters(JSON.parse(gameParameters));
+      setBoard(minesweeper.getBoard());
+    }
   }, [minesweeper]);
 
   React.useEffect(() => {
@@ -41,6 +49,13 @@ function App() {
       toggle();
     }
   }, [gameState]);
+
+  React.useEffect(() => {
+    localStorage.setItem(
+      "game_instance",
+      JSON.stringify(minesweeper.getCurrentGameParameters())
+    );
+  }, [board]);
 
   function revealCell(x: number, y: number) {
     minesweeper.revealCell(x, y);

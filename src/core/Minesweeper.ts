@@ -8,6 +8,12 @@ export type EventQueue = {
 export type GameState = "new" | "active" | "won" | "lost";
 export type GameEvent = "movement" | "state";
 export type EventHandler = (event: any) => void;
+export type GameParameters = {
+  level: Level;
+  board: Board;
+  solutionBoard: Board;
+  state: GameState;
+};
 
 class Minesweeper {
   private board: Board = [];
@@ -21,7 +27,7 @@ class Minesweeper {
   };
   private gameState: GameState = "new";
 
-  constructor(private readonly level: Level = "easy") {
+  constructor(private level: Level = "easy") {
     const levelRatios = {
       easy: 0.07,
       medium: 0.15,
@@ -58,6 +64,31 @@ class Minesweeper {
    * @returns Promise<void>
    */
   public load() {}
+
+  /**
+   * Return the current game parameters
+   */
+  public getCurrentGameParameters(): GameParameters {
+    return {
+      state: this.gameState,
+      board: this.board,
+      solutionBoard: this.solutionBoard,
+      level: this.level,
+    };
+  }
+
+  /**
+   * Restore game parameters stored in localStorage or coming from the API
+   * @param params GameParameters
+   */
+  public restoreGameParameters(params: GameParameters): void {
+    const { board, level, solutionBoard, state } = params;
+
+    this.board = board;
+    this.level = level;
+    this.solutionBoard = solutionBoard;
+    this.gameState = state;
+  }
 
   /**
    * X, Y generated grid

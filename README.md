@@ -1,3 +1,26 @@
+# React Minesweeper
+
+React-based minesweeper using neumorphism visual styling.
+
+![minesweeper](./minesweeper.png)
+
+## How to play
+
+- Use left click to reveal a cell.
+- Use right click to place a flag where you think a landmine is.
+- Reveal all the cells without triggering a landmine to win.
+
+## Features
+
+- TS Minesweeper core class that can be consumed from other frameworks or GUIs.
+- Ability to flag cells.
+- Browser reload persistance.
+- Ability to start a new game from the browser.
+- Local time tracker.
+- Ability to change between easy, medium or hard difficulty (through code only).
+
+# React README
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

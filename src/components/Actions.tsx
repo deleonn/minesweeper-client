@@ -14,8 +14,6 @@ function Actions({ startGame }: Props) {
       <NeuButton style={{ color: "#4444ee" }} onClick={startGame}>
         New Game
       </NeuButton>
-      <NeuButton style={{ color: "#de4bab" }}>Save Game</NeuButton>
-      <NeuButton style={{ color: "#a34bde" }}>Load Game</NeuButton>
     </Container>
   );
 }
