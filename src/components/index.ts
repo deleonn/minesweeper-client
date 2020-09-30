@@ -2,3 +2,8 @@ export { default as Cell } from "./Cell";
 export { default as Board } from "./Board";
 export { default as Col } from "./Col";
 export { default as Row } from "./Row";
+export { default as Timer } from "./Timer";
+export { default as Actions } from "./Actions";
+export { default as NeuButton } from "./NeuButton";
+export { default as Modal } from "./Modal";
+export { default as useModal } from "./useModal";
