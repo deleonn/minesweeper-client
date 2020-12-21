@@ -15,7 +15,7 @@ jobs:
         npm install
         npm run build
       env:
-        REACT_APP_API_URL={{secrets.apiUrl}}
+        REACT_APP_API_URL: ${{secrets.apiUrl}}
 
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@releases/v3
